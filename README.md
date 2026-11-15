@@ -1,67 +1,87 @@
-# health-hackathon-project
-AI diabetes risk screening prototype for community health workers. Enter age, BMI, blood pressure and glucose to get a risk level and a refer-for-testing flag, tuned to minimize missed cases. Built for the Veritas AI Hackathon 2026.  
- # SugarSpot: Diabetes Risk Screening for Community Health Workers
+ # SugarSpot
 
-**Track:** AI + Health | **Team:** WIM (Wings of Innovation in Medicine): Wada Mirkana, Meba Yonas, Inas Khalid
-**Veritas AI International High School Hackathon 2026**
+**Track:** Health
+**Team:** [Member 1 name], [Member 2 name], [Member 3 name]
 
-> This project is a prototype and is not medical advice.
+> **This project is a prototype and is not medical advice.**
 
-## The problem
-Many people have diabetes without knowing it. In many communities the first person they meet is a community health worker, who has limited time and often no lab access. They need a fast way to decide who should be sent for a blood test first.
+*Wings to lift, insight to guide, SugarSpot to heal.*
 
-## What we built
-A screening tool for a community health worker. They enter four simple measurements (age, BMI, blood pressure, glucose) and get back a risk level (Low / Medium / High) with a recommendation such as "refer for a blood test". Because a missed case is worse than an unnecessary test, we tuned the model to catch as many real cases as possible, and we report missed cases and false alarms separately.
+# The problem
 
-## What we added
-- **Our own question:** does the model work equally well across age groups? We split the test patients into under 30, 30-45 and over 45 and compared recall.
-- **Our fix:** we found the model missed more cases in patients under 30, so we tried a lower threshold (0.2) for patients aged 30 and under, chosen on validation data, then tested it once on the held-out test set.
-- **Our user:** the risk levels and wording are designed for a health worker deciding who to refer.
+In many communities in Ethiopia, people with raised blood sugar are found only after complications appear, and Health Extension Workers (HEWs) have far more people to see than time. SugarSpot helps one **HEW on a home or clinic visit** (and a **client** screening themselves) decide who should get a glucose test first, using four routine numbers (age, BMI, blood pressure, glucose), even when the person does not know some of them.
 
-## How it works
-- **Data:** Pima Indians Diabetes dataset, 768 patients (about 35% with diabetes). Zero values for glucose, blood pressure and BMI are really missing, so we replaced them with the median. Split: 460 training, 154 validation, 154 test. The test set was used once, at the end.
-- **Baseline:** predict "no diabetes" for everyone.
-- **Model:** logistic regression with balanced class weights, using age, BMI, blood pressure and glucose.
-- **Threshold:** we lowered the cutoff from 0.5 to 0.3 (chosen on the validation set) because a missed case costs more than a false alarm.
+# What we built
 
-## Results (held-out test set: 54 sick, 100 healthy patients)
-| | Accuracy | Recall (cases caught) | Missed cases | False alarms |
-|---|---|---|---|---|
-| Baseline: always "no diabetes" | 64.9% | 0% | 54 | 0 |
-| Model, threshold 0.3 | 66.9% | 87.0% | 7 | 44 |
-| Model, per-age threshold | 61.7% | 90.7% | 5 | 54 |
+**Goes in:** age, BMI, diastolic blood pressure and fasting glucose, typed or spoken. If the client does not know their BMI, blood pressure or glucose, a smart wizard (height and weight) works out BMI and the app estimates the other two.
+**Comes out:** a risk level (Low / Moderate / High), a probability, plain-language advice and a spoken result in the chosen language.
 
-**Fairness check by age (threshold 0.3):**
-| Age group | Patients | Sick | Caught | Missed | Recall |
-|---|---|---|---|---|---|
-| Under 30 | 89 | 18 | 14 | 4 | 78% |
-| 30-45 | 40 | 26 | 23 | 3 | 88% |
-| Over 45 | 25 | 10 | 10 | 0 | 100% |
+**How it is used**
+- **Client portal:** sign up (with a guardian's details if under 18), receive an ID, screen, save medicines (type the name or photograph the label) and habits, download data as CSV/PDF, message a HEW, and find nearby facilities by GPS.
+- **HEW portal:** log in with institution name and access code, see records of clients who agreed to share (sorted by risk), ask clients questions, send medical suggestions, post updates, and upload a **local dataset** so the model is retrained on a country's own data.
 
-The per-age threshold raised recall for under-30s from 78% to 89% (16 of 18), at the cost of 10 extra false alarms in that group (37 vs 27).
+Run it: open `SugarSpot_app.ipynb` in Google Colab, run the install cell, restart the session, then run the app cell and open the `gradio.live` link. The HEW demo access code is given in the submission notes (not published here).
 
-**Where it fails:**
-- It still missed 5 sick patients, and flags about half of healthy patients, which means many unnecessary blood tests. We accepted this trade-off because a missed diagnosis is worse than an extra test, but a clinic with limited testing capacity might choose differently.
-- Older patients get the most false alarms (about 60% of healthy patients over 45 were flagged). We think this is because age and glucose both raise risk, but we have not proven the cause.
-- Example of a wrong prediction: [add one patient from the missed-cases cell and why we think it happened]
+# What we added
 
-## Limitations
-- The age-group results use very few sick patients per group (10 to 26), so they are suggestive, not proven.
-- The dataset covers one population only (Pima women, 21 and older), so results may not transfer to other groups.
-- The test set is small (154 patients).
+**Our own idea** (same pattern as suggested project 4.1.2, tabular risk from checkup data, but for diabetes). On top of the baseline we added:
+- **Our own user:** a design built around the HEW workflow (consent-based sharing, two-way messaging, community risk list).
+- **Our own data path:** HEWs can upload a local country dataset (needs at least 30 valid rows); the model for that country is retrained, to reduce bias from the base data.
+- **Our own question:** we report how the model does for age groups and where it misses cases.
+- Estimators that fill in blood pressure and glucose when they are unknown, voice input/output, 17-language page translation, medicine-label photo reading, and an OpenStreetMap facility finder.
 
-## What we'd do next
-- Test on a second dataset such as CDC BRFSS to see whether the model works on a different population.
-- Try the tool with a real health worker to see whether the risk levels are useful.
+# How it works
 
-## How to run
-1. Open the notebook in Google Colab: [diabetes_risk_screening](https://colab.research.google.com/drive/1ocrT_IZ-r8z_3XjVv_V8LoEHOg0rs9aA?usp=sharing)
-2. Click **Runtime, then Run all**. It takes under a minute and needs no API keys or uploads.
-3. The notebook loads the Pima Indians Diabetes data, trains the model, and prints the results.
-4. To try the tool yourself, edit the numbers in the last cell and run it: `risk_check(age, bmi, blood_pressure, glucose)`. For example, `risk_check(52, 34, 85, 160)` returns a risk level and a recommendation.
+**Data:** Pima Indians Diabetes dataset (768 rows, women aged 21+, public). Zeros in glucose, blood pressure and BMI are treated as missing and replaced with the median. We use 4 features: Age, BMI, BloodPressure, Glucose. 80/20 train/test split, stratified, fixed random seed.
 
-## Sources
-- Dataset: Pima Indians Diabetes Database (UCI / NIDDK), loaded from a public copy at github.com/jbrownlee/Datasets
-- Libraries: scikit-learn, pandas, NumPy
-- AI tools used: Claude (help with planning )
-   
+**Model:** logistic regression with feature scaling (scikit-learn), chosen because it is simple, gives a probability and can be explained to a client. The alert threshold is 0.30 (0.20 for age 30 or younger) so it misses fewer real cases, at the cost of more false alarms. Blood pressure and glucose estimates come from two small linear regressions (age + BMI) trained on the same data.
+
+# Results
+
+All numbers are on the 20% test set the model never saw. *(Copy them from the "EVALUATION" block printed when the app cell starts.)*
+
+| Measure | Baseline ("always no diabetes") | Our model |
+|---|---|---|
+| Accuracy | [X]% | [X]% |
+| Recall (real cases caught) | 0% | [X]% |
+| Precision (alerts that were right) | n/a | [X]% |
+| **Missed cases (false negatives)** | all [X] real cases | [X] of [X] |
+| **False alarms (false positives)** | 0 | [X] |
+
+By age group: age 30 or younger: recall [X]%, missed [X], false alarms [X]; age over 30: recall [X]%, missed [X], false alarms [X].
+
+**Where it fails, and why we think so:** [paste one or two of the "MISSED" rows printed by the app and describe them, e.g. a person with normal-looking glucose and BMI but real diabetes]. The model only sees four numbers, so people whose risk comes from other things (family history, pregnancies, insulin levels) can look "low". Lowering the threshold catches more cases but raises false alarms (see the numbers above).
+
+**Known problems**
+- **Less accurate risk results when there is no data for the user's country.** The base data come from one group (Pima women, 21+) and may be less accurate for men, children and other populations. A country model exists only after a HEW uploads a local dataset, so for most countries (including Ethiopia today) results are less accurate.
+- **Estimated blood pressure and glucose are guesses** from age and BMI. The result card says "Estimated (not measured)" and confidence is lower.
+- **Local languages are under development.** Amharic, Afaan Oromoo and Tigrinya **voice input and voice output are under development**: Afaan Oromoo and Tigrinya have no voice yet, and Amharic voice is experimental. Their on-screen text uses machine translation that has not been checked by a native speaker.
+- Voice, translation, facility search and medicine-photo reading need internet; voice input needs Chrome or Edge.
+- Medicine-photo reading knows only about 20 common medicines and struggles with blurry photos.
+- Facility results come from OpenStreetMap, which is incomplete in rural areas; if it is unreachable a short approximate sample list is shown.
+- Accounts are stored in a simple file on the Colab machine (lost when the session resets). Emails are **not** sent: the ID and the password-reset code are shown on screen (demo mode). The HEW access code is a shared demo code, not real authentication.
+- The model is not clinically validated. Demo accounts use made-up test data only; no real patient records were used.
+
+# Languages available
+
+| Feature | Languages |
+|---|---|
+| Page translation (Google Website Translator, internet needed) | English, አማርኛ Amharic, Afaan Oromoo, ትግርኛ Tigrinya, العربية Arabic, Français, Español, Português, Deutsch, Kiswahili, हिन्दी Hindi, 中文 Chinese, 日本語, 한국어, Русский, Türkçe, Italiano (17) |
+| Voice output (spoken risk result) | English, Arabic, French, Spanish, Portuguese, German, Swahili, Hindi, Chinese, Japanese, Korean, Russian, Turkish, Italian. **Amharic: experimental.** **Afaan Oromoo, Tigrinya: under development** |
+| Voice input (browser speech recognition) | The same languages as the menu in the app. **Amharic: experimental. Afaan Oromoo, Tigrinya: under development** |
+
+# What we'd do next
+
+1. Test the Amharic, Afaan Oromoo and Tigrinya text and voice with native speakers, and build proper voice support for them.
+2. Work with HEWs to collect a consented, de-identified Ethiopian dataset so the model is trained on local patterns, then re-test missed cases and false alarms by age and sex.
+
+# Sources
+
+- Pima Indians Diabetes Database (Smith et al., 1988), CSV from https://github.com/jbrownlee/Datasets (original: UCI / Kaggle)
+- scikit-learn https://scikit-learn.org · pandas · NumPy · Requests
+- Gradio https://www.gradio.app · Google Colab
+- gTTS (Google text-to-speech) https://gtts.readthedocs.io · browser Web Speech API
+- Google Website Translator https://translate.google.com
+- Tesseract OCR / pytesseract (medicine label reading) · ReportLab (PDF export)
+- OpenStreetMap and the Overpass API https://www.openstreetmap.org (facility search)
+- AI tools used: Claude (help debugging and plan). All code was run by the team.
