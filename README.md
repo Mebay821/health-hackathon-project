@@ -1,7 +1,7 @@
  # SugarSpot
 
 **Track:** Health
-**Team:** WADA MIRKANA, MEBA YONAS , INAS KHALID
+**Team:** WADA MIRKANA, INAS KHALID, MEBA YONAS
 
 > **This project is a prototype and is not medical advice.**
 
