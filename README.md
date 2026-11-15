@@ -32,7 +32,7 @@ Run it: open the notebook in Google Colab (link under *How it works*) and choose
 
 # How it works
 
-**Code:** [Open the notebook in Google Colab](https://colab.research.google.com/github/Mebay821/health-hackathon-project/blob/main/diabetes_risk_screening.ipynb) (`diabetes_risk_screening.ipynb`). Choose Runtime > Run all. The notebook has these sections, in order:
+**Code:** [Open the notebook in Google Colab] (https://colab.research.google.com/drive/1-vqjebAnvQk7oyywUN_zfnjWPrJTJgWM) (` diabetes_risk_screening_final.ipynb`). Choose Runtime > Run all. The notebook has these sections, in order:
 
 | Section | What it does |
 |---|---|
