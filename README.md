@@ -32,7 +32,7 @@ Run it: open the notebook in Google Colab (link under *How it works*) and choose
 
 # How it works
 
-**Code:** [Open the notebook in Google Colab] (https://colab.research.google.com/drive/1-vqjebAnvQk7oyywUN_zfnjWPrJTJgWM) (` diabetes_risk_screening_final.ipynb`). Choose Runtime > Run all. The notebook has these sections, in order:
+**Code:** [Open the notebook in Google Colab] (https://colab.research.google.com/drive/1-vqjebAnvQk7oyywUN_zfnjWPrJTJgWM?usp=sharing) (` diabetes_risk_screening_final.ipynb`). Choose Runtime > Run all. The notebook has these sections, in order:
 
 | Section | What it does |
 |---|---|
